@@ -423,9 +423,9 @@ Pull requests welcome! Please follow:
 ## 📧 Contact
 
 **Your Name**
-- Email: your.email@example.com
-- LinkedIn: linkedin.com/in/yourprofile
-- GitHub: github.com/yourusername
+- Email:laxmisinghl850@gmail.com
+- LinkedIn: linkedin.com/in/laxmi-singh-696985348
+- GitHub: github.com/laxmi-singh-l
 
 ---
 

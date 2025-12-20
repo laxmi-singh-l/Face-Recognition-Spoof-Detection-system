@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pth
+*.pkl
+venv/
+dataset/
+static/uploads/*
+!static/uploads/.gitkeep
+logs/
+.env
+.DS_Store
+.idea/
+.vscode/

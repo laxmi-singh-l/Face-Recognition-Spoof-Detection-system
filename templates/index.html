@@ -1,0 +1,687 @@
+3rd
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition + Spoof Detection System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f9fafb;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #9ca3af;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 1.1em;
+            color: #6b7280;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .preview-area {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .preview-area.active {
+            display: block;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .results-container {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item.denied {
+            border-left-color: #ef4444;
+        }
+
+        .result-item.granted {
+            border-left-color: #10b981;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .result-value {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .status-granted {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-denied {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-spoof {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .webcam-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #webcam {
+            width: 100%;
+            display: block;
+        }
+
+        .webcam-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .main-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Face Recognition + Spoof Detection</h1>
+            <p>Advanced Security System with ML-Powered Liveness Detection</p>
+        </div>
+
+        <div class="main-card">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('detect')">🔍 Detection</button>
+                <button class="tab" onclick="switchTab('webcam')">📹 Live Camera</button>
+                <button class="tab" onclick="switchTab('register')">➕ Register Face</button>
+                <button class="tab" onclick="switchTab('about')">ℹ️ About</button>
+            </div>
+
+            <!-- Detection Tab -->
+            <div id="detect" class="tab-content active">
+                <h2 style="margin-bottom: 20px; color: #374151;">Upload Image for Detection</h2>
+
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageUpload').click()">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">
+                        Click to upload or drag and drop<br>
+                        <span style="font-size: 0.9em; color: #9ca3af;">Supports: JPG, PNG</span>
+                    </div>
+                </div>
+                <input type="file" id="imageUpload" accept="image/*">
+
+                <div class="preview-area" id="previewArea">
+                    <img id="previewImage" class="preview-image" src="" alt="Preview">
+                    <button class="btn btn-primary" onclick="processImage()">
+                        🔍 Analyze Image
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearImage()">
+                        🗑️ Clear
+                    </button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="color: #6b7280;">Processing image...</p>
+                </div>
+
+                <div class="results-container" id="resultsContainer" style="display: none;">
+                    <h3 style="margin-bottom: 16px; color: #374151;">Detection Results</h3>
+                    <div id="resultsList"></div>
+                </div>
+            </div>
+
+            <!-- Webcam Tab -->
+            <div id="webcam" class="tab-content">
+                <h2 style="margin-bottom: 20px; color: #374151;">Live Camera Detection</h2>
+
+                <div class="webcam-container">
+                    <video id="webcamFeed" autoplay playsinline></video>
+                    <canvas id="webcamCanvas" style="display: none;"></canvas>
+                </div>
+
+                <div class="webcam-controls">
+                    <button class="btn btn-primary" id="startWebcam" onclick="startWebcam()">
+                        📹 Start Camera
+                    </button>
+                    <button class="btn btn-secondary" id="stopWebcam" onclick="stopWebcam()" style="display: none;">
+                        ⏹️ Stop Camera
+                    </button>
+                    <button class="btn btn-secondary" onclick="captureFrame()">
+                        📸 Capture & Analyze
+                    </button>
+                </div>
+            </div>
+
+            <!-- Register Tab -->
+            <div id="register" class="tab-content">
+                <h2 style="margin-bottom: 20px; color: #374151;">Register New Face</h2>
+
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label" for="personName">Person Name</label>
+                        <input type="text" id="personName" class="form-input" placeholder="Enter full name" required>
+                    </div>
+
+                    <div class="upload-area" onclick="document.getElementById('faceUpload').click()">
+                        <div class="upload-icon">👤</div>
+                        <div class="upload-text">
+                            Upload clear face photo<br>
+                            <span style="font-size: 0.9em; color: #9ca3af;">Make sure face is clearly visible</span>
+                        </div>
+                    </div>
+                    <input type="file" id="faceUpload" accept="image/*">
+
+                    <div class="preview-area" id="registerPreview">
+                        <img id="registerImage" class="preview-image" src="" alt="Preview">
+                        <button type="button" class="btn btn-primary" onclick="registerFace()">
+                            ✅ Register Face
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- About Tab -->
+            <div id="about" class="tab-content">
+                <h2 style="margin-bottom: 20px; color: #374151;">System Architecture</h2>
+
+                <div class="grid-2">
+                    <div class="result-item">
+                        <div class="result-label">🎯 Face Detection</div>
+                        <div class="result-value">MTCNN (Multi-task Cascaded CNN) for accurate face localization</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">👤 Face Recognition</div>
+                        <div class="result-value">FaceNet embeddings with cosine similarity matching</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">🛡️ Liveness Detection</div>
+                        <div class="result-value">CNN classifier (MobileNetV2) for spoof detection</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">⚡ Real-time Processing</div>
+                        <div class="result-value">Optimized pipeline for live video streams</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 12px;">
+                    <h3 style="margin-bottom: 16px; color: #374151;">Attack Detection Capabilities</h3>
+                    <ul style="line-height: 2; color: #6b7280;">
+                        <li>📄 <strong>Photo Attack:</strong> Detects flat texture and lack of depth</li>
+                        <li>🎬 <strong>Video Replay:</strong> Identifies missing micro-facial movements</li>
+                        <li>💻 <strong>Screen Attack:</strong> Recognizes Moiré patterns and reflections</li>
+                        <li>👁️ <strong>Eye Blink:</strong> Validates natural eye movements</li>
+                        <li>🎭 <strong>3D Mask:</strong> Analyzes texture inconsistencies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let webcamStream = null;
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Image upload handling
+        document.getElementById('imageUpload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('previewArea').classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('faceUpload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('registerImage').src = e.target.result;
+                    document.getElementById('registerPreview').classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+        });
+
+        uploadArea.addEventListener('drop', function (e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('imageUpload').files = files;
+
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('previewArea').classList.add('active');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Process image
+        async function processImage() {
+            const fileInput = document.getElementById('imageUpload');
+            if (!fileInput.files[0]) return;
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('resultsContainer').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/process_image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                displayResults(data.results);
+            } catch (error) {
+                alert('Error processing image: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('resultsContainer');
+            const list = document.getElementById('resultsList');
+            list.innerHTML = '';
+
+            if (results.length === 0) {
+                list.innerHTML = '<p style="color: #6b7280;">No faces detected in the image.</p>';
+            } else {
+                results.forEach((result, index) => {
+                    const statusClass = result.access_granted ? 'granted' : 'denied';
+                    const statusBadge = result.is_real
+                        ? (result.access_granted ? 'status-granted' : 'status-denied')
+                        : 'status-spoof';
+                    const statusText = result.is_real
+                        ? (result.access_granted ? '✅ Access Granted' : '⛔ Access Denied')
+                        : '⚠️ Spoof Detected';
+
+                    const item = document.createElement('div');
+                    item.className = `result-item ${statusClass}`;
+                    item.innerHTML = `
+                        <div class="result-label">Face ${index + 1}</div>
+                        <div class="result-value">
+                            <strong>Identity:</strong> ${result.name}<br>
+                            <strong>Confidence:</strong> ${(result.similarity * 100).toFixed(1)}%<br>
+                            <strong>Liveness Score:</strong> ${(result.liveness_score * 100).toFixed(1)}%
+                        </div>
+                        <span class="status-badge ${statusBadge}">${statusText}</span>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            container.style.display = 'block';
+        }
+
+        function clearImage() {
+            document.getElementById('imageUpload').value = '';
+            document.getElementById('previewArea').classList.remove('active');
+            document.getElementById('resultsContainer').style.display = 'none';
+        }
+
+        // Webcam functions
+        async function startWebcam() {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720 }
+                });
+                document.getElementById('webcamFeed').srcObject = webcamStream;
+                document.getElementById('startWebcam').style.display = 'none';
+                document.getElementById('stopWebcam').style.display = 'inline-flex';
+            } catch (error) {
+                alert('Error accessing camera: ' + error.message);
+            }
+        }
+
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                document.getElementById('webcamFeed').srcObject = null;
+                document.getElementById('startWebcam').style.display = 'inline-flex';
+                document.getElementById('stopWebcam').style.display = 'none';
+            }
+        }
+
+        async function captureFrame() {
+            const video = document.getElementById('webcamFeed');
+            const canvas = document.getElementById('webcamCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('image', blob, 'capture.jpg');
+
+                try {
+                    const response = await fetch('/api/process_image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    displayResults(data.results);
+                    switchTab('detect');
+                } catch (error) {
+                    alert('Error processing frame: ' + error.message);
+                }
+            });
+        }
+
+        // Register face
+        async function registerFace() {
+            const name = document.getElementById('personName').value;
+            const fileInput = document.getElementById('faceUpload');
+
+            if (!name || !fileInput.files[0]) {
+                alert('Please provide name and photo');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/api/add_face', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Face registered successfully!');
+                    document.getElementById('registerForm').reset();
+                    document.getElementById('registerPreview').classList.remove('active');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error registering face: ' + error.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

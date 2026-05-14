@@ -428,5 +428,4 @@ Pull requests welcome! Please follow:
 - GitHub: github.com/laxmi-singh-l
 
 ---
-
 **⭐ If this project helped you, please give it a star!**

@@ -2,7 +2,6 @@
 Flask Web Application for Face Recognition + Spoof Detection System
 Complete backend with REST API endpoints
 """
-
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import cv2
 import os
